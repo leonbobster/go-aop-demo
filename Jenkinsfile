@@ -1,21 +1,29 @@
 pipeline {
-    agent { label 'docker' }
+    agent {
+        dockerfile {
+            filename 'Dockerfile-docker-compose'
+            dir 'docker'
+        }
+    }
     stages {
         stage('Build') {
             steps {
-                sh ' docker-compose -f build.yml up -d --build --remove-orphans'
-                sh ' docker-compose -f build.yml run php_cli composer install'
+                sh 'cat /etc/*-release'
+                sh 'pwd'
+                sh 'ls -al'
+                sh 'docker run -i --rm --name php56-cli php56_cli php -v'
+                sh 'docker build -f docker/Dockerfile-php-cli -t php56_cli .'
+                sh 'docker run -i --rm -v `pwd`:/app -w /app --name php56-cli php56_cli composer install'
             }
         }
         stage('Test') {
             steps {
-                sh ' docker-compose -f build.yml run php_cli php -v'
+                sh 'docker run -i --rm -v `pwd`:/app -w /app --name php56-cli php56_cli ./vendor/bin/phpunit --bootstrap ./vendor/autoload.php ./tests'
             }
         }
     }
-    post {
+    /*post {
         always {
-            sh ' docker-compose -f build.yml down'
         }
-    }
+    }*/
 }

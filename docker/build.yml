@@ -1,7 +1,0 @@
-version: '3'
-
-services:
-  php_cli:
-    build:
-      context: .
-      dockerfile: Dockerfile-php-cli
